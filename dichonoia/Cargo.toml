@@ -1,0 +1,16 @@
+[package]
+name = "dichonoia"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+fastwebsockets = { version = "0.10.0", features = ["upgrade"] }
+
+tokio.workspace = true
+thiserror.workspace = true
+dichonoia-models.workspace = true
+serde_json.workspace = true
+
+governor = "0.10.2"
+tokio-tungstenite = "0.28.0"
+futures-util = "0.3.31"
