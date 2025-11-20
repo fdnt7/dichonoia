@@ -1,6 +1,7 @@
+use bitflags::bitflags;
 use serde::de::Error as DeError;
 use serde::de::Unexpected;
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use serde_json::Error as JsonError;
 use serde_json::Value;
 
@@ -8,7 +9,7 @@ use serde_json::Value;
 pub enum GatewayPayload {
     Dispatch(DispatchPayload), // 0
     Heartbeat,                 // 1
-    Identify,                  // 2
+    Identify(IdentifyPayload), // 2
     PresenceUpdate,            // 3
     VoiceStateUpdate,          // 4
     Resume,                    // 6
@@ -28,14 +29,14 @@ impl GatewayPayload {
         match op {
             0 => Ok(Self::Dispatch(DispatchPayload::deserialize(value)?)),
             1 => Ok(Self::Heartbeat),
-            2 => Ok(Self::Identify),
+            2 => Ok(Self::Identify(Self::deserialize_data(&value)?)),
             3 => Ok(Self::PresenceUpdate),
             4 => Ok(Self::VoiceStateUpdate),
             6 => Ok(Self::Resume),
             7 => Ok(Self::Reconnect),
             8 => Ok(Self::RequestGuildMembers),
             9 => Ok(Self::InvalidSession),
-            10 => Ok(Self::Hello(HelloPayload::deserialize(op_val)?)),
+            10 => Ok(Self::Hello(Self::deserialize_data(&value)?)),
             11 => Ok(Self::HeartBeatACK),
             31 => Ok(Self::RequestSoundboardSounds),
             _ => Err(JsonError::invalid_value(
@@ -45,17 +46,37 @@ impl GatewayPayload {
         }
     }
 
+    fn deserialize_data<'de, D: Deserialize<'de>>(value: &'de Value) -> Result<D, JsonError> {
+        let data = value.get("d").ok_or(JsonError::missing_field("d"))?;
+        D::deserialize(data)
+    }
+
     pub fn to_json(self) -> Result<Value, JsonError> {
         let op = self.op();
 
-        let mut value = match self {
-            GatewayPayload::Dispatch(v) => serde_json::to_value(v)?,
-            GatewayPayload::Hello(v) => serde_json::to_value(v)?,
-            _ => Value::Object(Default::default()),
+        let mut value = if let Self::Dispatch(v) = self {
+            serde_json::to_value(v)?
+        } else {
+            let data = match self {
+                GatewayPayload::Dispatch(v) => serde_json::to_value(v)?,
+                GatewayPayload::Hello(v) => serde_json::to_value(v)?,
+                _ => Value::Null,
+            };
+
+            if matches!(data, Value::Object(_)) {
+                let mut map = serde_json::Map::with_capacity(2);
+                map.insert(String::from("d"), data);
+
+                Value::Object(map)
+            } else {
+                Value::Object(serde_json::Map::with_capacity(1))
+            }
         };
 
         if let Value::Object(obj) = &mut value {
             obj.insert("op".into(), Value::Number(op.into()));
+        } else {
+            panic!("Expected Value::Object, got {:?}", value);
         }
 
         Ok(value)
@@ -65,7 +86,7 @@ impl GatewayPayload {
         match self {
             GatewayPayload::Dispatch(_) => 0,
             GatewayPayload::Heartbeat => 1,
-            GatewayPayload::Identify => 2,
+            GatewayPayload::Identify(_) => 2,
             GatewayPayload::PresenceUpdate => 3,
             GatewayPayload::VoiceStateUpdate => 4,
             GatewayPayload::Resume => 6,
@@ -95,11 +116,53 @@ pub struct DispatchPayload {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HelloPayload {
-    #[serde(rename = "d")]
-    pub data: HelloPayloadData,
+    pub heartbeat_interval: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct HelloPayloadData {
-    heartbeat_interval: i32,
+pub struct IdentifyPayload {
+    pub token: String,
+    pub properties: IdentifyProperties,
+    #[serde(default)]
+    pub compress: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub large_threshold: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shard: Option<[i32; 2]>,
+    pub intents: GatewayIntents,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IdentifyProperties {
+    pub os: String,
+    pub browser: String,
+    pub device: String,
+}
+
+bitflags! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+    #[serde(transparent)]
+    pub struct GatewayIntents: i64 {
+        const GUILDS = 1 << 0;
+        const GUILD_MEMBERS = 1 << 1;
+        const GUILD_MODERATION = 1 << 2;
+        const GUILD_EXPRESSIONS = 1 << 3;
+        const GUILD_INTEGRATIONS = 1 << 4;
+        const GUILD_WEBHOOKHS = 1 << 5;
+        const GUILD_INVITES = 1 << 6;
+        const GUILD_VOICE_STATES = 1 << 7;
+        const GUILD_PRESENCES = 1 << 8;
+        const GUILD_MESSAGES = 1 << 9;
+        const GUILD_MESSAGE_REACTIONS = 1 << 10;
+        const GUILD_MESSAGE_TYPING = 1 << 11;
+        const DIRECT_MESSAGES = 1 << 12;
+        const DIRECT_MESSAGE_REACTIONS = 1 << 13;
+        const DIRECT_MESSAGE_TYPING = 1 << 14;
+        const MESSAGE_CONTENT = 1 << 15;
+        const GUILD_SCHEDULED_EVENTS = 1 << 16;
+        const AUTO_MODERATION_CONFIGURATION = 1 << 20;
+        const AUTO_MODERATION_EXECUTION = 1 << 21;
+        const GUILD_MESSAGE_POLLS = 1 << 24;
+        const DIRECT_MESSAGE_POLLS = 1 << 25;
+    }
 }
