@@ -1,5 +1,6 @@
 pub mod events;
 
+use crate::gateway::events::ReadyEvent;
 use bitflags::__private::serde::{Deserializer, Serializer};
 use bitflags::bitflags;
 use serde::de::Error as DeError;
@@ -7,7 +8,6 @@ use serde::de::Unexpected;
 use serde::{Deserialize, Serialize};
 use serde_json::Error as JsonError;
 use serde_json::Value;
-use crate::gateway::events::ReadyEvent;
 
 #[derive(Debug, Clone)]
 pub enum GatewayPayload {

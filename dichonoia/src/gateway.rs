@@ -96,10 +96,7 @@ impl GatewayClient {
         GatewayPayload::from_json(value).map_err(GatewayError::from)
     }
 
-    pub async fn write_payload(
-        &mut self,
-        payload: GatewayPayload,
-    ) -> Result<()> {
+    pub async fn write_payload(&mut self, payload: GatewayPayload) -> Result<()> {
         if self.rate_limiter.check().is_ok() {
             Self::write_to_stream(&mut self.stream, payload).await
         } else {

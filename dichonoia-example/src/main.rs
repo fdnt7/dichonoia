@@ -1,10 +1,10 @@
-use std::error::Error;
 use dichonoia::gateway::GatewayClient;
 use dichonoia::http::HttpClient;
 use dichonoia_models::gateway::GatewayIntents;
+use std::error::Error;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>>{
+async fn main() -> Result<(), Box<dyn Error>> {
     let token = std::env::var("BOT_TOKEN")?;
     let http = HttpClient::new(&token);
 
