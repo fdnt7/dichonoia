@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+use crate::id::GuildId;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UnavailableGuild {
-    pub id: String,
+    pub id: GuildId,
     pub unavailable: bool,
 }

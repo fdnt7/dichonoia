@@ -1,9 +1,11 @@
 use serde::{Deserialize, Serialize};
 
+use crate::id::UserId;
+
 // TODO: Finish rest of the struct
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
-    pub id: String,
+    pub id: UserId,
     pub username: String,
     pub discriminator: String,
     pub global_name: Option<String>,
