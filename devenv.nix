@@ -59,6 +59,16 @@
 
   # https://devenv.sh/git-hooks/
   # git-hooks.hooks.shellcheck.enable = true;
+  git-hooks.hooks = {
+    nixfmt-rfc-style.enable = true;
+    rustfmt.enable = true;
+
+    codespell = {
+      enable = true;
+      entry = "codespell";
+      pass_filenames = false;
+    };
+  };
 
   # See full reference at https://devenv.sh/reference/options/
 }
