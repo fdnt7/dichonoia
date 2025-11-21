@@ -2,41 +2,47 @@ use dichonoia_models::gateway::{
     GatewayIntents, GatewayPayload, IdentifyPayload, IdentifyProperties,
 };
 use futures_util::{SinkExt, StreamExt};
-use thiserror::Error;
+use governor::clock::DefaultClock;
+use governor::state::{InMemoryState, NotKeyed};
+use governor::{Quota, RateLimiter};
+use std::num::NonZeroU32;
 use tokio::net::TcpStream;
 use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_tungstenite::tungstenite::{Error as TungsteniteError, Message};
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 
-pub type Result<T, E = Error> = std::result::Result<T, E>;
+pub type Result<T, E = GatewayError> = std::result::Result<T, E>;
 type WsStream = WebSocketStream<MaybeTlsStream<TcpStream>>;
 
-#[derive(Debug, Error)]
-pub enum Error {
+#[derive(Debug, thiserror::Error)]
+pub enum GatewayError {
     #[error("Encountered websocket error: {0}")]
-    WebsocketError(TungsteniteError),
+    Websocket(TungsteniteError),
     #[error("Encountered json error: {0}")]
-    JsonError(serde_json::Error),
+    Json(serde_json::Error),
+    #[error("Websocket ratelimit hit")]
+    Ratelimit,
 }
 
-impl From<TungsteniteError> for Error {
+impl From<TungsteniteError> for GatewayError {
     fn from(value: TungsteniteError) -> Self {
-        Self::WebsocketError(value)
+        Self::Websocket(value)
     }
 }
 
-impl From<serde_json::Error> for Error {
+impl From<serde_json::Error> for GatewayError {
     fn from(value: serde_json::Error) -> Self {
-        Self::JsonError(value)
+        Self::Json(value)
     }
 }
 
-pub struct GatewayStream {
+pub struct GatewayClient {
     stream: WsStream,
     heartbeat_interval: i32,
+    rate_limiter: RateLimiter<NotKeyed, InMemoryState, DefaultClock>,
 }
 
-impl GatewayStream {
+impl GatewayClient {
     pub async fn connect(token: &str, intents: GatewayIntents) -> Result<Self> {
         let request = "wss://gateway.discord.gg/?v=10&encoding=json".into_client_request()?;
         let (mut stream, _response) = tokio_tungstenite::connect_async(request).await?;
@@ -60,8 +66,12 @@ impl GatewayStream {
         };
         Self::write_to_stream(&mut stream, GatewayPayload::Identify(identify)).await?;
 
+        let max_burst = NonZeroU32::new(120).unwrap();
+        let rate_limiter = RateLimiter::direct(Quota::per_hour(max_burst));
+
         Ok(Self {
             stream,
+            rate_limiter,
             heartbeat_interval: hello_payload.heartbeat_interval,
         })
     }
@@ -83,14 +93,18 @@ impl GatewayStream {
 
         let text = message.into_text()?;
         let value = serde_json::from_str(&text)?;
-        GatewayPayload::from_json(value).map_err(Error::from)
+        GatewayPayload::from_json(value).map_err(GatewayError::from)
     }
 
     pub async fn write_payload(
         &mut self,
         payload: GatewayPayload,
-    ) -> impl Future<Output = Result<()>> {
-        Self::write_to_stream(&mut self.stream, payload)
+    ) -> Result<()> {
+        if self.rate_limiter.check().is_ok() {
+            Self::write_to_stream(&mut self.stream, payload).await
+        } else {
+            Err(GatewayError::Ratelimit)
+        }
     }
 
     async fn write_to_stream(stream: &mut WsStream, payload: GatewayPayload) -> Result<()> {

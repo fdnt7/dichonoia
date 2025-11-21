@@ -1,9 +1,13 @@
+pub mod events;
+
+use bitflags::__private::serde::{Deserializer, Serializer};
 use bitflags::bitflags;
 use serde::de::Error as DeError;
 use serde::de::Unexpected;
 use serde::{Deserialize, Serialize};
 use serde_json::Error as JsonError;
 use serde_json::Value;
+use crate::gateway::events::ReadyEvent;
 
 #[derive(Debug, Clone)]
 pub enum GatewayPayload {
@@ -58,7 +62,7 @@ impl GatewayPayload {
             serde_json::to_value(v)?
         } else {
             let data = match self {
-                GatewayPayload::Dispatch(v) => serde_json::to_value(v)?,
+                GatewayPayload::Identify(v) => serde_json::to_value(v)?,
                 GatewayPayload::Hello(v) => serde_json::to_value(v)?,
                 _ => Value::Null,
             };
@@ -101,9 +105,9 @@ impl GatewayPayload {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "t", content = "d")]
+#[serde(tag = "t", content = "d", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum GatewayEvent {
-    A,
+    Ready(ReadyEvent),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -140,8 +144,7 @@ pub struct IdentifyProperties {
 }
 
 bitflags! {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-    #[serde(transparent)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     pub struct GatewayIntents: i64 {
         const GUILDS = 1 << 0;
         const GUILD_MEMBERS = 1 << 1;
@@ -165,4 +168,38 @@ bitflags! {
         const GUILD_MESSAGE_POLLS = 1 << 24;
         const DIRECT_MESSAGE_POLLS = 1 << 25;
     }
+}
+
+impl Serialize for GatewayIntents {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_i64(self.bits())
+    }
+}
+
+impl<'de> Deserialize<'de> for GatewayIntents {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value = i64::deserialize(deserializer)?;
+        Ok(Self::from_bits_truncate(value))
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GatewayBot {
+    pub url: String,
+    pub shards: i32,
+    pub session_start_limit: SessionStartLimit,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SessionStartLimit {
+    pub total: i32,
+    pub remaining: i32,
+    pub reset_after: i64,
+    pub max_concurrency: i32,
 }
