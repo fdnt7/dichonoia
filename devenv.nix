@@ -12,7 +12,14 @@
 
   # https://devenv.sh/packages/
   # packages = [ pkgs.git ];
-  packages = [ pkgs.openssl ];
+  packages =
+    let
+      inherit (pkgs) codespell openssl;
+    in
+    [
+      codespell
+      openssl
+    ];
 
   # https://devenv.sh/languages/
   # languages.rust.enable = true;
