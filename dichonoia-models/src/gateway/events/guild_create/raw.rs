@@ -19,7 +19,7 @@
 //! separately again to represent scenario #3. To avoid over-counting, A tagged union
 //! can be used to represent the disjointure.
 //!
-//! [^1]: https://discord.com/developers/docs/resources/guild#unavailable-guild-object
+//! [^1]: <https://discord.com/developers/docs/resources/guild#unavailable-guild-object>
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 

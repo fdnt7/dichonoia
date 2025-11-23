@@ -3,6 +3,9 @@ name = "dichonoia-models"
 version = "0.1.0"
 edition = "2024"
 
+[lints]
+workspace = true
+
 [dependencies]
 bitflags = { version = "2.10.0", features = ["serde"] }
 

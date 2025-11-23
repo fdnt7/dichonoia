@@ -19,7 +19,7 @@ pub enum RateLimitError {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct RateLimiter {
+pub struct RateLimiter {
     buckets: Cache<String, RateLimitState>,
 }
 
@@ -57,7 +57,7 @@ impl RateLimiter {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct RateLimitState {
+pub struct RateLimitState {
     _limit: i32,
     remaining: i32,
     reset: DateTime<Utc>,
@@ -68,7 +68,9 @@ impl RateLimitState {
         let limit: i32 = get_parsed_header(response, "X-RateLimit-Limit")?;
         let remaining: i32 = get_parsed_header(response, "X-RateLimit-Limit")?;
         let reset_stamp: f64 = get_parsed_header(response, "X-RateLimit-Reset")?;
-        let reset = Utc.timestamp_opt(reset_stamp.floor() as i64, 0).unwrap();
+        #[expect(clippy::cast_possible_truncation)]
+        let secs = reset_stamp.floor() as i64;
+        let reset = Utc.timestamp_opt(secs, 0).unwrap();
 
         Ok(Self {
             _limit: limit,
@@ -88,7 +90,11 @@ impl Expiry<String, RateLimitState> for RateLimitExpiry {
         _created_at: Instant,
     ) -> Option<Duration> {
         let now = Utc::now();
-        Some((value.reset - now).to_std().unwrap())
+        Some(
+            (value.reset - now)
+                .to_std()
+                .expect("duration must not be less than zero"),
+        )
     }
 }
 

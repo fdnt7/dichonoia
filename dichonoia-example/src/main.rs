@@ -6,7 +6,7 @@ use std::error::Error;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let token = std::env::var("BOT_TOKEN")?;
-    let http = HttpClient::new(&token);
+    let _http = HttpClient::new(&token);
 
     let intents = GatewayIntents::GUILDS;
     let mut gateway = GatewayClient::connect(&token, intents).await?;
@@ -14,8 +14,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     loop {
         let payload = gateway.read_payload().await?;
-        println!("Payload: {payload:#?}")
+        println!("Payload: {payload:#?}");
     }
-
-    Ok(())
 }

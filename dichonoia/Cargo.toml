@@ -3,6 +3,9 @@ name = "dichonoia"
 version = "0.1.0"
 edition = "2024"
 
+[lints]
+workspace = true
+
 [dependencies]
 tokio-tungstenite = { version = "0.28.0", features = ["native-tls"] }
 

@@ -24,7 +24,7 @@ impl Display for Discriminator {
 
 /// The discriminator returned by the Discord API for users who migrated to Pomelo[^1].
 ///
-/// [^1]: https://dis.gd/usernames
+/// [^1]: <https://dis.gd/usernames>
 const POMELO: &str = "0";
 
 pub(super) fn deserialize<'de, D>(deserializer: D) -> Result<Option<Discriminator>, D::Error>
@@ -39,21 +39,18 @@ where
 
     if s.len() != 4 || !s.chars().all(|c| c.is_ascii_digit()) {
         return Err(serde::de::Error::custom(format!(
-            "invalid discriminator '{}': expected a 4-digit string",
-            s
+            "invalid discriminator '{s}': expected a 4-digit string"
         )));
     }
 
     let value = s.parse::<NonZeroU16>().map_err(|_| {
-        serde::de::Error::custom(format!(
-            "invalid discriminator '{}': cannot parse as u16",
-            s
-        ))
+        serde::de::Error::custom(format!("invalid discriminator '{s}': cannot parse as u16"))
     })?;
 
     Ok(Some(Discriminator(value)))
 }
 
+#[expect(clippy::ref_option, clippy::trivially_copy_pass_by_ref)]
 pub(super) fn serialize<S>(value: &Option<Discriminator>, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,

@@ -43,11 +43,21 @@ impl From<RateLimitError> for HttpError {
 }
 
 impl HttpClient {
+    /// # Panics
+    /// ...
     pub fn new(token: &str) -> Self {
         let mut headers: HeaderMap<HeaderValue> = HeaderMap::with_capacity(1);
-        headers.insert(AUTHORIZATION, format!("Bot {token}").parse().unwrap());
+        headers.insert(
+            AUTHORIZATION,
+            format!("Bot {token}")
+                .parse()
+                .expect("auth header must be correct"),
+        );
 
-        let http = Client::builder().default_headers(headers).build().unwrap();
+        let http = Client::builder()
+            .default_headers(headers)
+            .build()
+            .expect("TLS backend should be initialised");
 
         Self {
             http,
@@ -67,7 +77,7 @@ impl HttpClient {
         resp.json().await.map_err(HttpError::from)
     }
 
-    async fn get_query<Q: Serialize + ?Sized, B: DeserializeOwned>(
+    async fn get_query<Q: Serialize + ?Sized + Send + Sync, B: DeserializeOwned>(
         &self,
         path: &str,
         query: &Q,
@@ -84,7 +94,7 @@ impl HttpClient {
         resp.json().await.map_err(HttpError::from)
     }
 
-    async fn post<Req: Serialize + ?Sized, Resp: DeserializeOwned>(
+    async fn post<Req: Serialize + ?Sized + Send + Sync, Resp: DeserializeOwned>(
         &self,
         path: &str,
         body: &Req,
@@ -104,5 +114,5 @@ impl HttpClient {
 
 #[inline]
 fn url(path: &str) -> String {
-    format!("https://discord.com/api/v10{}", path)
+    format!("https://discord.com/api/v10{path}")
 }

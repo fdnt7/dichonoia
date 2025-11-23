@@ -26,8 +26,13 @@ pub enum GatewayPayload {
 }
 
 impl GatewayPayload {
+    /// # Errors
+    ///
+    /// ...
     pub fn from_json(value: Value) -> Result<Self, JsonError> {
-        let op_val = value.get("op").ok_or(JsonError::missing_field("op"))?;
+        let op_val = value
+            .get("op")
+            .ok_or_else(|| JsonError::missing_field("op"))?;
         let op = i32::deserialize(op_val)?;
 
         match op {
@@ -44,17 +49,26 @@ impl GatewayPayload {
             11 => Ok(Self::HeartBeatACK),
             31 => Ok(Self::RequestSoundboardSounds),
             _ => Err(JsonError::invalid_value(
-                Unexpected::Signed(op as i64),
+                Unexpected::Signed(i64::from(op)),
                 &"Not a valid opcode",
             )),
         }
     }
 
     fn deserialize_data<'de, D: Deserialize<'de>>(value: &'de Value) -> Result<D, JsonError> {
-        let data = value.get("d").ok_or(JsonError::missing_field("d"))?;
+        let data = value
+            .get("d")
+            .ok_or_else(|| JsonError::missing_field("d"))?;
         D::deserialize(data)
     }
 
+    /// # Panics
+    ///
+    /// ...
+    ///
+    /// # Errors
+    ///
+    /// ...
     pub fn to_json(self) -> Result<Value, JsonError> {
         let op = self.op();
 
@@ -62,8 +76,8 @@ impl GatewayPayload {
             serde_json::to_value(v)?
         } else {
             let data = match self {
-                GatewayPayload::Identify(v) => serde_json::to_value(v)?,
-                GatewayPayload::Hello(v) => serde_json::to_value(v)?,
+                Self::Identify(v) => serde_json::to_value(v)?,
+                Self::Hello(v) => serde_json::to_value(v)?,
                 _ => Value::Null,
             };
 
@@ -80,26 +94,27 @@ impl GatewayPayload {
         if let Value::Object(obj) = &mut value {
             obj.insert("op".into(), Value::Number(op.into()));
         } else {
-            panic!("Expected Value::Object, got {:?}", value);
+            panic!("Expected Value::Object, got {value:?}");
         }
 
         Ok(value)
     }
 
-    pub fn op(&self) -> i32 {
+    #[must_use]
+    pub const fn op(&self) -> i32 {
         match self {
-            GatewayPayload::Dispatch(_) => 0,
-            GatewayPayload::Heartbeat => 1,
-            GatewayPayload::Identify(_) => 2,
-            GatewayPayload::PresenceUpdate => 3,
-            GatewayPayload::VoiceStateUpdate => 4,
-            GatewayPayload::Resume => 6,
-            GatewayPayload::Reconnect => 7,
-            GatewayPayload::RequestGuildMembers => 8,
-            GatewayPayload::InvalidSession => 9,
-            GatewayPayload::Hello(_) => 10,
-            GatewayPayload::HeartBeatACK => 11,
-            GatewayPayload::RequestSoundboardSounds => 31,
+            Self::Dispatch(_) => 0,
+            Self::Heartbeat => 1,
+            Self::Identify(_) => 2,
+            Self::PresenceUpdate => 3,
+            Self::VoiceStateUpdate => 4,
+            Self::Resume => 6,
+            Self::Reconnect => 7,
+            Self::RequestGuildMembers => 8,
+            Self::InvalidSession => 9,
+            Self::Hello(_) => 10,
+            Self::HeartBeatACK => 11,
+            Self::RequestSoundboardSounds => 31,
         }
     }
 }

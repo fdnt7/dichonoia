@@ -43,6 +43,11 @@ pub struct GatewayClient {
 }
 
 impl GatewayClient {
+    /// # Errors
+    /// ...
+    ///
+    /// # Panics
+    /// ...
     pub async fn connect(token: &str, intents: GatewayIntents) -> Result<Self> {
         let request = "wss://gateway.discord.gg/?v=10&encoding=json".into_client_request()?;
         let (mut stream, _response) = tokio_tungstenite::connect_async(request).await?;
@@ -66,7 +71,7 @@ impl GatewayClient {
         };
         Self::write_to_stream(&mut stream, GatewayPayload::Identify(identify)).await?;
 
-        let max_burst = NonZeroU32::new(120).unwrap();
+        let max_burst = NonZeroU32::new(120).expect("`120` must be non-zero");
         let rate_limiter = RateLimiter::direct(Quota::per_hour(max_burst));
 
         Ok(Self {
@@ -96,6 +101,9 @@ impl GatewayClient {
         GatewayPayload::from_json(value).map_err(GatewayError::from)
     }
 
+    /// # Errors
+    ///
+    /// ...
     pub async fn write_payload(&mut self, payload: GatewayPayload) -> Result<()> {
         if self.rate_limiter.check().is_ok() {
             Self::write_to_stream(&mut self.stream, payload).await

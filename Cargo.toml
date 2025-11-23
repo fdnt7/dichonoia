@@ -2,6 +2,16 @@
 resolver = "3"
 members = ["dichonoia", "dichonoia-example","dichonoia-models"]
 
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+enum_glob_use = "forbid"
+unwrap_used = "forbid"
+try_err = "forbid"
+pedantic = { level = "deny", priority = -1 }
+nursery = { level = "deny", priority = -1 }
+
 [workspace.dependencies]
 serde = { version = "1.0.228", features = ["derive"] }
 tokio = { version = "1.48.0", features = ["net"] }

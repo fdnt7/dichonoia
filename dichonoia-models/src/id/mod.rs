@@ -31,7 +31,7 @@ impl<'de, T: Entity> Deserialize<'de> for Snowflake<T> {
     {
         struct Visitor<T: Entity>(PhantomData<fn(T) -> T>);
 
-        impl<'de, T: Entity> serde::de::Visitor<'de> for Visitor<T> {
+        impl<T: Entity> serde::de::Visitor<'_> for Visitor<T> {
             type Value = Snowflake<T>;
 
             fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {

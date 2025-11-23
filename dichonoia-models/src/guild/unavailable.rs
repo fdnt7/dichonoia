@@ -6,8 +6,8 @@
 //! However, the `unavailable` field is guaranteed to be `true`[^2], so it can be
 //! normalised to simply the `id` field as `GuildId`.
 //!
-//! [^1]: https://discord.com/developers/docs/resources/guild#unavailable-guild-object
-//! [^2]: https://discord.com/developers/docs/events/gateway-events#ready
+//! [^1]: <https://discord.com/developers/docs/resources/guild#unavailable-guild-object>
+//! [^2]: <https://discord.com/developers/docs/events/gateway-events#ready>
 
 use core::fmt;
 
@@ -29,7 +29,7 @@ pub struct UnavailableGuild {
 }
 
 impl UnavailableGuild {
-    pub fn new(id: GuildId) -> Self {
+    pub const fn new(id: GuildId) -> Self {
         Self {
             id,
             unavailable: true,

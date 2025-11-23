@@ -34,7 +34,8 @@ pub struct GuildCreateExtraData {
 }
 
 impl GuildCreate {
-    pub fn guild_id(&self) -> GuildId {
+    #[must_use]
+    pub const fn guild_id(&self) -> GuildId {
         match self {
             Self::Available { guild, .. } => guild.id,
             Self::Unavailable(guild_id) => *guild_id,
