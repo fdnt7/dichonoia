@@ -37,10 +37,15 @@ mod guilds {
 
     use serde::de::{SeqAccess, Visitor};
     use serde::ser::SerializeSeq; // codespell:ignore ser
-    use serde::{Deserializer, Serializer};
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-    use crate::guild::UnavailableGuild;
     use crate::id::GuildId;
+
+    #[derive(Serialize, Deserialize)]
+    struct UnavailableGuild {
+        pub id: GuildId,
+        pub unavailable: bool,
+    }
 
     /// Custom serializer: turn `Vec<GuildId>` back into the original
     /// `[{"id": ..., "unavailable": true}, ...]` shape, so it still matches
