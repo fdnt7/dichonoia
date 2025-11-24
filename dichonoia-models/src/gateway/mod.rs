@@ -161,7 +161,7 @@ pub struct IdentifyProperties {
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-    pub struct GatewayIntents: i64 {
+    pub struct GatewayIntents: u32 {
         const GUILDS = 1 << 0;
         const GUILD_MEMBERS = 1 << 1;
         const GUILD_MODERATION = 1 << 2;
@@ -191,7 +191,7 @@ impl Serialize for GatewayIntents {
     where
         S: Serializer,
     {
-        serializer.serialize_i64(self.bits())
+        serializer.serialize_u32(self.bits())
     }
 }
 
@@ -200,8 +200,8 @@ impl<'de> Deserialize<'de> for GatewayIntents {
     where
         D: Deserializer<'de>,
     {
-        let value = i64::deserialize(deserializer)?;
-        Ok(Self::from_bits_truncate(value))
+        Self::from_bits(<_>::deserialize(deserializer)?)
+            .ok_or_else(|| serde::de::Error::custom("invalid application flags"))
     }
 }
 
