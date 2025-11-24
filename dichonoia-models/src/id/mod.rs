@@ -9,7 +9,7 @@ use crate::id::marker::{Entity, Guild, User};
 pub type GuildId = Snowflake<Guild>;
 pub type UserId = Snowflake<User>;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Snowflake<T: Entity> {
     inner: NonZeroU64,
     entity: PhantomData<fn(T) -> T>,
