@@ -4,8 +4,9 @@ use core::fmt;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{marker::PhantomData, num::NonZeroU64};
 
-use crate::id::marker::{Entity, Guild, User};
+use crate::id::marker::{Application, Entity, Guild, User};
 
+pub type ApplicationId = Snowflake<Application>;
 pub type GuildId = Snowflake<Guild>;
 pub type UserId = Snowflake<User>;
 

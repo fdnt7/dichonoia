@@ -1,7 +1,11 @@
+pub mod partial_application;
 pub mod shard_info;
 
-use crate::user::User;
-use crate::{gateway::events::ready::shard_info::ShardInfo, id::GuildId};
+use crate::{
+    gateway::events::ready::{partial_application::PartialApplication, shard_info::ShardInfo},
+    id::GuildId,
+    user::User,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -18,6 +22,6 @@ pub struct ReadyEvent {
     pub resume_gateway_url: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub shard: Option<ShardInfo>,
-    // Partial application object
-    // pub application: Application
+    /// Contains `id` and `flags`
+    pub application: PartialApplication,
 }

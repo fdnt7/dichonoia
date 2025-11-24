@@ -17,4 +17,4 @@ macro_rules! define_entities {
     };
 }
 
-define_entities![Guild, User];
+define_entities![Guild, User, Application];
