@@ -1,11 +1,11 @@
 pub mod events;
 
 use crate::gateway::events::{GuildCreate, ReadyEvent};
-use bitflags::__private::serde::{Deserializer, Serializer};
 use bitflags::bitflags;
+use serde::Deserializer;
 use serde::de::Error as DeError;
 use serde::de::Unexpected;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use serde_json::Error as JsonError;
 use serde_json::Value;
 
