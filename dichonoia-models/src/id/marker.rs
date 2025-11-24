@@ -6,10 +6,15 @@ pub trait Entity: sealed::Sealed {}
 
 impl<T> sealed::Sealed for T where T: Entity {}
 
-#[derive(Debug, Clone, Copy)]
-pub struct Guild;
-impl Entity for Guild {}
+macro_rules! define_entities {
+    ( $( $name:ident ),+ $(,)? ) => {
+        $(
+            #[derive(Debug, Clone, Copy)]
+            pub struct $name;
 
-#[derive(Debug, Clone, Copy)]
-pub struct User;
-impl Entity for User {}
+            impl Entity for $name {}
+        )+
+    };
+}
+
+define_entities![Guild, User];
