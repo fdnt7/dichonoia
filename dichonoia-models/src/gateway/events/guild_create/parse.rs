@@ -48,59 +48,63 @@ struct AvailableGuildCreate<G, M> {
     metadata: M,
 }
 
-pub fn serialize<S>(guild_crate: &GuildCreate, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    match guild_crate {
-        GuildCreate::Available {
-            guild,
-            source,
-            extra_data: metadata,
-        } => RawGuildCreate::Available(AvailableGuildCreate {
-            unavailable: match source {
-                GuildCreateSource::Joined => None,
-                GuildCreateSource::BecameAvailable => Some(false),
-            },
-            guild,
-            metadata,
-        }),
-        GuildCreate::Unavailable(id) => RawGuildCreate::Unavailable(UnavailableGuild::new(*id)),
-    }
-    .serialize(serializer)
-}
-
-pub fn deserialize<'de, D>(deserializer: D) -> Result<GuildCreate, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let value = RawGuildCreate::<Guild, GuildCreateExtraData>::deserialize(deserializer)?;
-
-    let obj = match value {
-        RawGuildCreate::Available(AvailableGuildCreate {
-            unavailable,
-            guild,
-            metadata,
-        }) => {
-            let source = match unavailable {
-                None => GuildCreateSource::Joined,
-                Some(false) => GuildCreateSource::BecameAvailable,
-                Some(true) => {
-                    return Err(serde::de::Error::custom(
-                        "`unavailable` must be absent or false for an available guild",
-                    ));
-                }
-            };
-            GuildCreate::Available {
+impl Serialize for GuildCreate {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Available {
                 guild,
                 source,
                 extra_data: metadata,
-            }
+            } => RawGuildCreate::Available(AvailableGuildCreate {
+                unavailable: match source {
+                    GuildCreateSource::Joined => None,
+                    GuildCreateSource::BecameAvailable => Some(false),
+                },
+                guild,
+                metadata,
+            }),
+            Self::Unavailable(id) => RawGuildCreate::Unavailable((*id).into()),
         }
-        RawGuildCreate::Unavailable(unavailable_guild) => {
-            GuildCreate::Unavailable(unavailable_guild.id)
-        }
-    };
+        .serialize(serializer)
+    }
+}
 
-    Ok(obj)
+impl<'de> Deserialize<'de> for GuildCreate {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value = RawGuildCreate::<Guild, GuildCreateExtraData>::deserialize(deserializer)?;
+
+        let obj = match value {
+            RawGuildCreate::Available(AvailableGuildCreate {
+                unavailable,
+                guild,
+                metadata,
+            }) => {
+                let source = match unavailable {
+                    None => GuildCreateSource::Joined,
+                    Some(false) => GuildCreateSource::BecameAvailable,
+                    Some(true) => {
+                        return Err(serde::de::Error::custom(
+                            "`unavailable` must be absent or false for an available guild",
+                        ));
+                    }
+                };
+                Self::Available {
+                    guild,
+                    source,
+                    extra_data: metadata,
+                }
+            }
+            RawGuildCreate::Unavailable(unavailable_guild) => {
+                Self::Unavailable(unavailable_guild.into())
+            }
+        };
+
+        Ok(obj)
+    }
 }

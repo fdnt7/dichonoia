@@ -28,12 +28,18 @@ pub struct UnavailableGuild {
     pub unavailable: bool,
 }
 
-impl UnavailableGuild {
-    pub const fn new(id: GuildId) -> Self {
+impl From<GuildId> for UnavailableGuild {
+    fn from(value: GuildId) -> Self {
         Self {
-            id,
+            id: value,
             unavailable: true,
         }
+    }
+}
+
+impl From<UnavailableGuild> for GuildId {
+    fn from(value: UnavailableGuild) -> Self {
+        value.id
     }
 }
 
@@ -46,7 +52,7 @@ where
 {
     let mut seq = serializer.serialize_seq(Some(guilds.len()))?;
     for &id in guilds {
-        seq.serialize_element(&UnavailableGuild::new(id))?;
+        seq.serialize_element(&UnavailableGuild::from(id))?;
     }
     seq.end()
 }
@@ -72,7 +78,7 @@ where
             let mut out = Vec::with_capacity(seq.size_hint().unwrap_or(0));
 
             while let Some(g) = seq.next_element::<UnavailableGuild>()? {
-                out.push(g.id);
+                out.push(g.into());
             }
 
             Ok(out)

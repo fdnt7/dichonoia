@@ -1,4 +1,4 @@
-pub(in crate::gateway) mod raw;
+mod parse;
 
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;

@@ -123,7 +123,6 @@ impl GatewayPayload {
 #[serde(tag = "t", content = "d", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum GatewayEvent {
     Ready(ReadyEvent),
-    #[serde(with = "events::guild_create::raw")]
     GuildCreate(GuildCreate),
 }
 
