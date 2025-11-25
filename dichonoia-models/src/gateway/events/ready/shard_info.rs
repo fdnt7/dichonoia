@@ -1,9 +1,10 @@
-use std::num::NonZeroUsize;
+use std::num::NonZeroU16;
 
-#[derive(Debug, Clone)]
+/// <https://discord.com/developers/docs/events/gateway#sharding>
+#[derive(Debug, Clone, Copy)]
 pub struct ShardInfo {
-    id: u32,
-    num: NonZeroUsize,
+    id: u16,
+    num: NonZeroU16,
 }
 
 /// Internally, Discord's payload format for the shard info is an
