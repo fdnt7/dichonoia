@@ -162,8 +162,10 @@ use std::num::NonZeroU16;
 /// [`max_concurrency`]: crate::gateway::SessionStartLimit
 #[derive(Debug, Clone, Copy)]
 pub struct ShardInfo {
-    id: u16,
-    num: NonZeroU16,
+    /// Shard ID
+    pub id: u16,
+    /// Number of shards
+    pub num: NonZeroU16,
 }
 
 /// Internally, Discord's payload format for the shard info is an
