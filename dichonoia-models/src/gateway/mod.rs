@@ -1,6 +1,6 @@
 pub mod events;
 
-use crate::gateway::events::{GuildCreate, ReadyEvent};
+use crate::gateway::events::{GuildCreate, Ready};
 use bitflags::bitflags;
 use serde::Deserializer;
 use serde::de::Error as DeError;
@@ -122,7 +122,7 @@ impl GatewayPayload {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "t", content = "d", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum GatewayEvent {
-    Ready(ReadyEvent),
+    Ready(Ready),
     GuildCreate(GuildCreate),
 }
 
