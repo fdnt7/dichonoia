@@ -15,6 +15,39 @@ pub struct Snowflake<T: Entity> {
     entity: PhantomData<fn(T) -> T>,
 }
 
+impl<T: Entity> Snowflake<T> {
+    #[must_use]
+    pub const fn new_nonzero(n: NonZeroU64) -> Self {
+        Self {
+            inner: n,
+            entity: PhantomData,
+        }
+    }
+
+    #[inline]
+    #[must_use]
+    pub const fn get_nonzero(self) -> NonZeroU64 {
+        self.inner
+    }
+
+    #[inline]
+    #[must_use]
+    pub const fn get(self) -> u64 {
+        self.inner.get()
+    }
+
+    #[inline]
+    #[must_use]
+    pub const fn cast_into<U: Entity>(self) -> Snowflake<U> {
+        Snowflake::cast_from(self)
+    }
+
+    #[must_use]
+    pub const fn cast_from<U: Entity>(value: Snowflake<U>) -> Self {
+        Self::new_nonzero(value.inner)
+    }
+}
+
 impl<T: Entity> Serialize for Snowflake<T> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
