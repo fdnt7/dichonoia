@@ -2,7 +2,7 @@ mod sealed {
     pub trait Sealed {}
 }
 
-pub trait Entity: sealed::Sealed {}
+pub trait Entity: sealed::Sealed + Copy {}
 
 impl<T> sealed::Sealed for T where T: Entity {}
 
