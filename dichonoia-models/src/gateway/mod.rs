@@ -212,10 +212,17 @@ pub struct GatewayBot {
     pub session_start_limit: SessionStartLimit,
 }
 
+/// Session Start Limit Object
+///
+/// <https://discord.com/developers/docs/events/gateway#session-start-limit-object>
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SessionStartLimit {
+    /// Total number of session starts the current user is allowed
     pub total: i32,
+    /// Remaining number of session starts the current user is allowed
     pub remaining: i32,
+    /// Number of milliseconds after which the limit resets
     pub reset_after: i64,
+    /// Number of identify requests allowed per 5 seconds
     pub max_concurrency: i32,
 }

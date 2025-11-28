@@ -12,3 +12,6 @@ bitflags = "2.10.0"
 serde.workspace = true
 serde_json.workspace = true
 time = { version = "0.3.44", features = ["serde", "serde-well-known"] }
+
+[package.metadata.docs.rs]
+rustdoc-args = ["--extend-css", "assets/rustdoc.css"]
