@@ -3,10 +3,10 @@
     "devenv": {
       "locked": {
         "dir": "src/modules",
-        "lastModified": 1763737463,
+        "lastModified": 1764354319,
         "owner": "cachix",
         "repo": "devenv",
-        "rev": "07290edba5b803163b69def89589de28744bfbd5",
+        "rev": "cf80afd21444fa1d489f726edc7ec6db5238f6bc",
         "type": "github"
       },
       "original": {
@@ -40,10 +40,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1763319842,
+        "lastModified": 1763988335,
         "owner": "cachix",
         "repo": "git-hooks.nix",
-        "rev": "7275fa67fbbb75891c16d9dee7d88e58aea2d761",
+        "rev": "50b9238891e388c9fdc6a5c49e49c42533a1b5ce",
         "type": "github"
       },
       "original": {
@@ -105,10 +105,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1763692705,
+        "lastModified": 1764297505,
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "6fbf5d328dce1828d887b8ee7d44a785196a34e7",
+        "rev": "9623580f8ce09ec444b9aca107566ec5db110e62",
         "type": "github"
       },
       "original": {
