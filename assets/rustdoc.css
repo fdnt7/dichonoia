@@ -1,0 +1,120 @@
+/* https://github.com/rust-lang/rust/blob/main/src/librustdoc/html/static/css/rustdoc.css */
+
+/*
+ * Extended theme configuration.
+ *
+ * These colors are based off Github's (blue for notes, green for tips, etc.), though the exact
+ * colors are taken from `rustdoc`'s themes.
+ */
+:root[data-theme="light"] {
+    --note: #2196f3;
+    --tip: #068000;
+    --important: #6e4fc9;
+    --warning: #ff8e00;
+    --caution: #be2525;
+}
+
+:root[data-theme="dark"] {
+    --note: #008dfd;
+    --tip: #2bab63;
+    --important: #b78cf2;
+    --warning: #ff8e00;
+    --caution: #d93d3d;
+}
+
+:root[data-theme="ayu"] {
+    --note: #39afd7;
+    --tip: #b8cc52;
+    --important: #a37acc;
+    --warning: #ff8e00;
+    --caution: #df3600;
+}
+
+p, .docblock > .note, .docblock > .tip, .docblock > .important, .docblock > .warning, .docblock > .caution {
+	/* Paragraph spacing at least 1.5 times line spacing per Web Content Accessibility Guidelines.
+	   Line-height is 1.5rem, so line spacing is .5rem; .75em is 1.5 times that.
+	   https://www.w3.org/WAI/WCAG21/Understanding/visual-presentation.html */
+	margin: 0 0 .75em 0;
+}
+
+/* For the last child of a div, the margin will be taken care of
+	by the margin-top of the next item. */
+p:last-child,
+.docblock > .note:last-child,
+.docblock > .tip:last-child,
+.docblock > .important:last-child,
+.docblock > .warning:last-child,
+.docblock > .caution:last-child {
+	margin: 0;
+}
+
+/* These classes only exist for users who want to draw attention to a particular element in their
+documentation. */
+.content .docblock .note,
+.content .docblock .tip,
+.content .docblock .important,
+.content .docblock .warning,
+.content .docblock .caution {
+	padding: 14px;
+	position: relative;
+	/* The "!important" part is required because the rule is otherwise overruled in this CSS
+	selector: ".docblock > :not(.more-examples-toggle):not(.example-wrap)" */
+	overflow-x: visible !important;
+}
+/* Shared styling */
+.content .docblock .note::before,
+.content .docblock .tip::before,
+.content .docblock .important::before,
+.content .docblock .warning::before,
+.content .docblock .caution::before {
+    position: absolute;
+    left: -25px;
+    top: 5px;
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+.content .docblock .note::before {
+    content: "[i]";
+}
+.content .docblock .tip::before {
+    content: "⁇";
+}
+.content .docblock .important::before {
+    content: "‼";
+}
+.content .docblock .warning::before {
+    content: "ⓘ";
+}
+.content .docblock .caution::before {
+    content: "🗲";
+}
+.content .docblock .note {
+	border-left: 2px solid var(--note);
+}
+.content .docblock .tip{
+	border-left: 2px solid var(--tip);
+}
+.content .docblock .important{
+	border-left: 2px solid var(--important);
+}
+.content .docblock .warning {
+	border-left: 2px solid var(--warning);
+}
+.content .docblock .caution {
+	border-left: 2px solid var(--caution);
+}
+.content .docblock .note::before {
+	color: var(--note);
+}
+.content .docblock .tip::before {
+	color: var(--tip);
+}
+.content .docblock .important::before {
+	color: var(--important);
+}
+.content .docblock .warning::before {
+	color: var(--warning);
+}
+.content .docblock .caution::before {
+	color: var(--caution);
+}

@@ -20,3 +20,6 @@ serde_json.workspace = true
 moka.workspace = true
 chrono.workspace = true
 reqwest.workspace = true
+
+[package.metadata.docs.rs]
+rustdoc-args = ["--extend-css", "assets/rustdoc.css"]
