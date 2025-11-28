@@ -1,6 +1,5 @@
 pub mod marker;
 
-use core::fmt;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{marker::PhantomData, num::NonZeroU64};
 
@@ -30,29 +29,8 @@ impl<'de, T: Entity> Deserialize<'de> for Snowflake<T> {
     where
         D: Deserializer<'de>,
     {
-        struct Visitor<T: Entity>(PhantomData<fn(T) -> T>);
-
-        impl<T: Entity> serde::de::Visitor<'_> for Visitor<T> {
-            type Value = Snowflake<T>;
-
-            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.write_str("a non-zero u64 as a string")
-            }
-
-            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
-            where
-                E: serde::de::Error,
-            {
-                let raw: u64 = v.parse().map_err(E::custom)?;
-                let inner = NonZeroU64::new(raw).ok_or_else(|| E::custom("ID must be non-zero"))?;
-
-                Ok(Snowflake {
-                    inner,
-                    entity: PhantomData,
-                })
-            }
-        }
-
-        deserializer.deserialize_str(Visitor(PhantomData))
+        let value = String::deserialize(deserializer)?;
+        let n = value.parse().map_err(serde::de::Error::custom)?;
+        Ok(Self::new_nonzero(n))
     }
 }
