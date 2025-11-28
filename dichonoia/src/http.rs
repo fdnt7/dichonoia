@@ -66,6 +66,7 @@ impl HttpClient {
         }
     }
 
+    /// <https://discord.com/developers/docs/events/gateway#get-gateway-bot>
     pub fn get_gateway_bot(&self) -> impl Future<Output = Result<GatewayBot>> {
         self.get("/gateway/bot")
     }
